@@ -1,0 +1,56 @@
+{
+    "system": {
+        "net": "ALOCC_plus",
+        "time": null,
+        "gpu": [0],
+        "have_loss_weight":true,
+        "net_param":{
+            "kernel_size":5,
+            "input_dim":1,
+            "growth_dim":32,
+            "nStride":1
+        },
+        "loss_param":{
+            "D_opt":{
+                "lr":1e-5,
+                "betas":[0,0.9], 
+                "eps":1e-8
+            },
+            "D_net":{
+                "input_shape":[25,25],
+                "kernel_size": 5,
+                "input_dim": 1,
+                "growth_dim": 16,
+                "nStride": 1
+            },
+            "gan_k":1,
+            "loss_weight":[0.3,0.3,0.4]
+        },
+        "evaluate_param":{
+            "novelty_threshold":0.5
+        }
+    },
+    "train":{
+        "optimizer": "adam",
+        "learning_rate": 5e-5,
+        "adam":{"weight_decay":1e-5},
+        "sgd":{"weight_decay": 1e-5,"moment":0.9},
+        "decay_rate": 0.1,
+        "milestones": [70],
+        "max_epoch": 100,
+        "save_epoch": 1,
+        "batch_size": 4,
+        "max_batch": null
+    },
+    "test": {
+        "batch_size": 1
+    },
+    "dataset": {
+        "file_name": "demo",
+        "num_workers":2,
+        "train_shuffle":true,
+        "direction": "../data/sig_patch",
+        "Pos_Neg_sample_rate": [1,1],
+        "validation_rate": 0.2
+    }
+}

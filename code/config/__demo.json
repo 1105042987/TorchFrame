@@ -1,0 +1,39 @@
+{
+    "system": {
+        "net": "ALOCC_plus",
+        "time": null,
+        "gpu": [0],
+        "have_loss_weight":true,
+        "net_param":{
+
+        },
+        "loss_param":{
+            
+        },
+        "evaluate_param":{
+
+        }
+    },
+    "train":{
+        "optimizer": "adam",
+        "learning_rate": 5e-5,
+        "adam":{"weight_decay":1e-5},
+        "sgd":{"weight_decay": 1e-5,"moment":0.9},
+        "decay_rate": 0.1,
+        "milestones": [70],
+        "max_epoch": 100,
+        "save_epoch": 1,
+        "batch_size": 4,
+        "max_batch": null
+    },
+    "test": {
+        "batch_size": 1
+    },
+    "dataset": {
+        "file_name": "demo",
+        "num_workers":2,
+        "train_shuffle":true,
+        "direction": "../data/sig_patch"
+
+    }
+}

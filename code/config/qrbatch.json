@@ -1,0 +1,38 @@
+{
+    "system": {
+        "net": "QRNet_patch",
+        "time": null,
+        "gpu": [],
+        "have_loss_weight":false,
+        "net_param":{},
+        "loss_param":{},
+        "evaluate_param":{
+            "image_shape":[[288,216], [672,504]],
+            "input_width":1920
+        }
+    },
+    "train":{
+        "optimizer": "adam",
+        "learning_rate": 1e-3,
+        "adam":{"weight_decay":1e-4},
+        "sgd":{"weight_decay": 1e-5,"moment":0.9},
+        "decay_rate": 0.6,
+        "milestones": [100,200,300,400],
+        "max_epoch": 500,
+        "save_epoch": 10,
+        "batch_size": 1,
+        "max_batch": null
+    },
+    "test": {
+        "batch_size": 1
+    },
+    "dataset": {
+        "file_name": "QR",
+        "num_workers": 2,
+        "train_shuffle": true,
+        "direction": ["/home/qsf/Documents/Dataset/QR/train/", "D:/lenovo/Documents/Dataset/QRdata/train/"],
+        "whole_image_dir": ["/home/qsf/Documents/Dataset/QR/3lux/", "D:/lenovo/Documents/Dataset/QRdata/small/2/"],
+        "image_shape": [[288,216], [672,504]],
+        "readin_shape": [1920, 1440]
+    }
+}

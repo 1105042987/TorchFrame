@@ -1,0 +1,61 @@
+{
+    "system": {
+        "net": "ALOCC_plus",
+        "time": null,
+        "gpu": [0],
+        "have_loss_weight":true,
+        "net_param":{
+            "kernel_size":5,
+            "input_dim":1,
+            "growth_dim":32,
+            "nStride":1
+        },
+        "loss_param":{
+            "D_opt":{
+                "lr":1e-4,
+                "betas":[0,0.5], 
+                "eps":1e-8
+            },
+            "D_net":{
+                "input_shape":[28,28],
+                "kernel_size": 5,
+                "input_dim": 1,
+                "growth_dim": 16,
+                "nStride": 1
+            },
+            "gan_k":1,
+            "loss_weight":[1,0.2,0.2]
+        },
+        "evaluate_param":{
+            "novelty_threshold":0.050,
+            "weights":[1,0.005]
+        }
+    },
+    "train":{
+        "optimizer": "adam",
+        "learning_rate": 1e-4,
+        "adam":{"weight_decay":1e-5,"betas":[0,0.5]},
+        "sgd":{"weight_decay": 1e-5,"moment":0.9},
+        "decay_rate": 0.1,
+        "milestones": [1000],
+        "max_epoch": 1000,
+        "save_epoch": 5,
+        "batch_size": 128,
+        "max_batch": null
+    },
+    "test": {
+        "batch_size": 10
+    },
+    "dataset": {
+        "file_name": "mnist",
+        "path": "../../Dataset/MNIST/raw",
+        "num_workers":2,
+        "train_shuffle":true,
+        "pos_num": [1],
+        "neg_num": [6,7],
+        "image_shape":[28,28],
+        "noise_amplitude":0.05,
+        "label_noise":0.3,
+        "test_positive_rate":0.5
+    }
+}

@@ -1,0 +1,46 @@
+{
+    "system": {
+        "net": "DEEMS",
+        "time": null,
+        "gpu": [0],
+        "have_loss_weight":true,
+        "net_param":{
+            "item_num":2e5,
+            "user_num":2e5,
+            "hidden_units_u":20,
+            "hidden_units_i":20,
+            "position_len":20,
+            "strengthen_method":"ATTN"
+        },
+        "loss_param":{
+            "reg":1,
+            "hedge1":1,
+            "hedge2":1
+        },
+        "evaluate_param":{
+        }
+    },
+    "train":{
+        "optimizer": "adam",
+        "learning_rate": 1e-4,
+        "adam":{"weight_decay":1e-5,"betas":[0,0.5]},
+        "sgd":{"weight_decay": 1e-5,"moment":0.9},
+        "decay_rate": 0.1,
+        "milestones": [1000],
+        "max_epoch": 1000,
+        "save_epoch": 5,
+        "batch_size": 128,
+        "max_batch": null
+    },
+    "test": {
+        "batch_size": 10
+    },
+    "dataset": {
+        "file_name": "clothes",
+        "path": "D:/lenovo/Documents/Dataset/",
+        "num_workers":2,
+        "train_shuffle":true,
+        "trunc_len":20,
+        "neg_rate":0.1
+    }
+}

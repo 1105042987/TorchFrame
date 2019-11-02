@@ -1,0 +1,50 @@
+{
+    "system": {
+        "net": "classifier",
+        "time": null,
+        "gpu": [0,1,2,3],
+        "have_loss_weight":false,
+        "net_param":{
+            "backbone_position":["utils.backbone.Efficientnet","Efficientnet"],
+            "param":{
+                "pretrained":true,
+                "name":"efficientnet-b0",
+                "num_classes":1
+            }
+        },
+        "loss_param":{
+        },
+        "evaluate_param":{
+            "th":0.4
+        }
+    },
+    "train":{
+        "optimizer": "adam",
+        "learning_rate": 1e-3,
+        "adam":{"weight_decay":0},
+        "sgd":{"weight_decay": 1e-5,"momentum":0.9},
+        "decay_rate": 0.1,
+        "milestones": [50,100,150,200],
+        "max_epoch": 250,
+        "save_epoch": 10,
+        "batch_size": 40,
+        "max_batch": null
+    },
+    "test": {
+        "batch_size": 8
+    },
+    "dataset": {
+        "file_name": "digest_class",
+        "num_workers":8,
+        "shuffle_name": "shuffle_idx2.pt",
+        "direction": "../../digest/",
+        "Pos_Neg_sample_rate": [1,1],
+        "max_batch": 100,
+        "train_rate": 0.8,
+        "whole_image": false,
+        "pure_pos": true,
+        "positive_picture_only":true,
+        "patch_size": 512,
+        "stride_rate": 0.9
+    }
+}
