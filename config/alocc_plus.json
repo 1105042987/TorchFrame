@@ -3,14 +3,13 @@
         "net": "ALOCC_plus",
         "time": null,
         "gpu": [0],
-        "have_loss_weight":true,
         "net_param":{
-            "kernel_size":5,
-            "input_dim":1,
-            "growth_dim":32,
-            "nStride":1
-        },
-        "loss_param":{
+            "G_net":{
+                "kernel_size":5,
+                "input_dim":1,
+                "growth_dim":32,
+                "nStride":1
+            },
             "D_opt":{
                 "lr":1e-4,
                 "betas":[0,0.5], 
@@ -23,7 +22,9 @@
                 "growth_dim": 16,
                 "nStride": 1
             },
-            "gan_k":1,
+            "gan_k":1
+        },
+        "loss_param":{
             "loss_weight":[1,0.2,0.2]
         },
         "evaluate_param":{
@@ -31,8 +32,8 @@
             "weights":[1,0.005]
         }
     },
-    "train":{
-        "optimizer": "adam",
+    "optimizer":{
+        "type": "adam",
         "learning_rate": 1e-4,
         "adam":{"weight_decay":1e-5,"betas":[0,0.5]},
         "sgd":{"weight_decay": 1e-5,"moment":0.9},

@@ -14,13 +14,10 @@ class Dataset(torch.utils.data.Dataset):
         return 20
 
 
-def dataloader(cfg,mode):
+def dataloader(cfg, mode):
     transforms = T.Compose([
         T.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
     dataset = Dataset(cfg,mode)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=cfg['batch_size'], shuffle=cfg['train_shuffle'], num_workers=cfg['num_workers'])
-    if train:
-        return loader,None
-    else:
-        return loader
+    loader = torch.utils.data.DataLoader(dataset, batch_size=cfg['batch_size'], shuffle=cfg['shuffle'], num_workers=cfg['num_workers'])
+    return loader

@@ -1,9 +1,9 @@
 {
     "system": {
-        "net": "ALOCC_plus",
+        "net": ["ALOCC_plus","net"],
+        "remark": "",
         "time": null,
         "gpu": [0],
-        "have_loss_weight":true,
         "net_param":{
 
         },
@@ -14,26 +14,32 @@
 
         }
     },
-    "train":{
-        "optimizer": "adam",
+    "optimizer":{
+        "type": "adam",
         "learning_rate": 5e-5,
         "adam":{"weight_decay":1e-5},
         "sgd":{"weight_decay": 1e-5,"moment":0.9},
+
         "decay_rate": 0.1,
         "milestones": [70],
+
+        "test_on_train": true,
+        "eval_on_train": false,
         "max_epoch": 100,
-        "save_epoch": 1,
-        "batch_size": 4,
-        "max_batch": null
-    },
-    "test": {
-        "batch_size": 1
+        "max_batch": null,
+        "save_epoch": 0
     },
     "dataset": {
-        "file_name": "demo",
-        "num_workers":2,
-        "train_shuffle":true,
-        "direction": "../data/sig_patch"
-
+        "file_name": "__demo",
+        "num_workers": 2,
+        "direction": "%DATA%/sig_patch",
+        "train":{
+            "shuffle":true,
+            "batch_size": 16
+        },
+        "test": {
+            "shuffle":false,
+            "batch_size": 64
+        }
     }
 }

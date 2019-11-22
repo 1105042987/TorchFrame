@@ -39,8 +39,8 @@ class loss(weak_loss):
         return loss, {'BCE':loss}
 
 class evaluate(weak_evaluate):
-    def __init__(self, result_dir,image_shape,input_width):
-        super(evaluate, self).__init__(result_dir)
+    def __init__(self,image_shape,input_width):
+        super(evaluate, self).__init__()
         self.image_shape = [tuple(x) for x in image_shape]
         self.label_shape = [tuple(y//8 for y in x) for x in image_shape]
         self.input_width = input_width

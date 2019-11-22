@@ -17,28 +17,13 @@ class weak_loss(nn.Module,metaclass=ABCMeta):
         for key,val in dic.items():
             dic[key] = to_float(val)
         return loss,dic
-    
-    def load_state_dict(self,dic):
-        # if your loss have weights and needs to save, rewrite this two func
-        pass
-
-    def state_dict(self):
-        # if your loss have weights and needs to save, rewrite this two func
-        return None
-    
-    def to(self,dev):
-        return self
-        
-
 
 class weak_evaluate(metaclass=ABCMeta):
-    def __init__(self,result_dir):
+    def __init__(self):
         super(weak_evaluate, self).__init__()
         self.continue_visual = True
         self.first_enter = True
-        self.result_dir = result_dir
-        if not os.path.exists(self.result_dir):
-            os.makedirs(self.result_dir)
+        self.result_dir = None
 
     def __call__(self,inputs,preds,targets,visual=False,save=False):
         _eval = self.get_eval(inputs,preds,targets)
@@ -46,7 +31,7 @@ class weak_evaluate(metaclass=ABCMeta):
             _eval[key] = to_float(val)
         if save: self.save(inputs, preds, targets, _eval)
         if not visual: return _eval
-    
+
         if self.first_enter:
             key = input("\nif you want quit, input 'q'.\n# Any key to continue#")
             self.first_enter = False
@@ -60,7 +45,7 @@ class weak_evaluate(metaclass=ABCMeta):
             if key == ord('q') or key == 'q': 
                 self.continue_visual = False
         return _eval
-        
+
     @abstractmethod
     def get_eval(self,inputs,preds,targets):
         return {}
@@ -94,7 +79,7 @@ class weak_SplitPatch(metaclass=ABCMeta):
     def __iter__(self):
         self.GEN = self.Generator()
         return self
-    
+
     def __next__(self):
         inps = torch.Tensor([])
         tars = torch.Tensor([])

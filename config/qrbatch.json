@@ -1,9 +1,9 @@
 {
     "system": {
-        "net": "QRNet_patch",
+        "net": ["QRNet_patch","net"],
         "time": null,
         "gpu": [],
-        "have_loss_weight":false,
+        "remark": "",
         "net_param":{},
         "loss_param":{},
         "evaluate_param":{
@@ -11,28 +11,34 @@
             "input_width":1920
         }
     },
-    "train":{
-        "optimizer": "adam",
+    "optimizer":{
+        "type": "adam",
         "learning_rate": 1e-3,
         "adam":{"weight_decay":1e-4},
         "sgd":{"weight_decay": 1e-5,"moment":0.9},
+
         "decay_rate": 0.6,
         "milestones": [100,200,300,400],
+
+        "test_on_train": true,
+        "eval_on_train": false,
         "max_epoch": 500,
-        "save_epoch": 10,
-        "batch_size": 1,
-        "max_batch": null
-    },
-    "test": {
-        "batch_size": 1
+        "max_batch": null,
+        "save_epoch": 0
     },
     "dataset": {
         "file_name": "QR",
         "num_workers": 2,
-        "train_shuffle": true,
-        "direction": ["/home/qsf/Documents/Dataset/QR/train/", "D:/lenovo/Documents/Dataset/QRdata/train/"],
-        "whole_image_dir": ["/home/qsf/Documents/Dataset/QR/3lux/", "D:/lenovo/Documents/Dataset/QRdata/small/2/"],
+        "direction": "D:\\Documents\\VSCode\\python\\4a\\train\\",
+        "whole_image_dir": "D:\\Documents\\VSCode\\python\\4a\\train\\img\\",
         "image_shape": [[288,216], [672,504]],
-        "readin_shape": [1920, 1440]
+        "readin_shape": [1920, 1440],
+        "batch_size": 1,
+        "train":{
+            "shuffle": true
+        },
+        "test":{
+            "shuffle": false
+        }
     }
 }

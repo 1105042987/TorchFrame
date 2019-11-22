@@ -8,15 +8,13 @@ class QRloader(torch.utils.data.Dataset):
     def __init__(self,cfg,train,transform):
         super(QRloader, self).__init__()
         self.train = train
-        if platform.system() == "Windows": idx=1
-        else: idx=0
         if train:
-            self.img_dir = cfg['direction'][idx]+'img/'
-            self.label_dir = cfg['direction'][idx]+'label/'
+            self.img_dir = cfg['direction']+'img/'
+            self.label_dir = cfg['direction']+'label/'
             self.name_list = os.listdir(self.img_dir)
             self.len = len(self.name_list)
         else:
-            self.img_dir = cfg['whole_image_dir'][idx]
+            self.img_dir = cfg['whole_image_dir']
             self.name_list = os.listdir(self.img_dir)
             self.len = len(self.name_list)
         self.image_shape = [tuple(x) for x in cfg['image_shape']]
@@ -50,11 +48,8 @@ def dataloader(cfg, mode):
     train = mode=='train'
     transforms = T.Compose([
         T.ToTensor(),
-        # T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
     dataset = QRloader(cfg,train,transforms)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=cfg['batch_size'], shuffle=cfg['train_shuffle'], num_workers=cfg['num_workers'])
-    if train:
-        return loader,None
-    else:
-        return loader
+    loader = torch.utils.data.DataLoader(dataset, batch_size=cfg['batch_size'], shuffle=cfg['shuffle'], num_workers=cfg['num_workers'])
+    return loader
