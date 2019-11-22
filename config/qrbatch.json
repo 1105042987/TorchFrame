@@ -20,7 +20,7 @@
         "decay_rate": 0.6,
         "milestones": [100,200,300,400],
 
-        "test_on_train": true,
+        "test_on_train": false,
         "eval_on_train": false,
         "max_epoch": 500,
         "max_batch": null,
@@ -29,15 +29,15 @@
     "dataset": {
         "file_name": "QR",
         "num_workers": 2,
-        "direction": "D:\\Documents\\VSCode\\python\\4a\\train\\",
-        "whole_image_dir": "D:\\Documents\\VSCode\\python\\4a\\train\\img\\",
         "image_shape": [[288,216], [672,504]],
         "readin_shape": [1920, 1440],
         "batch_size": 1,
         "train":{
+            "direction": "%DATA%\\QRdata\\",
             "shuffle": true
         },
         "test":{
+            "direction": "%DATA%\\QRdata\\img\\",
             "shuffle": false
         }
     }

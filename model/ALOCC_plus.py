@@ -7,51 +7,23 @@ import numpy as np
 import torch.nn as nn
 from docker.abstract_model import weak_evaluate,weak_loss
 
+loss_d = 0
 class net(nn.Module):
-    def __init__(self,**args):
+    def __init__(self,G_net,D_net,D_opt,gan_k):
         super(net,self).__init__()
-        self.G_net = generator(**args)
-
-    def forward(self,xs):
-        return self.G_net(xs)
-
-
-class loss(weak_loss):
-    def __init__(self,D_net,D_opt,gan_k,loss_weight):
-        super(loss, self).__init__()
+        self.G_net = generator(**G_net)
         self.D_net = discriminator(**D_net)
         self.D_opt = torch.optim.Adam(self.D_net.parameters(), **D_opt)
-
-        self.w = loss_weight
-        # MAE loss between Generated image and original image
-        self.Lg = nn.L1Loss()
-        # MSE loss between Encoder1 and Encoder2
-        self.Le = nn.MSELoss()
         # Discriminartor Loss
         self.Ld_pos = nn.BCEWithLogitsLoss()
         self.Ld_neg = nn.BCEWithLogitsLoss()
-        # Mixed loss
-        self.Lgd = nn.BCEWithLogitsLoss()
         self.gan_k = gan_k
         self.train_d = True
 
-    def state_dict(self):
-        return {'net':self.D_net.state_dict(),'opt':self.D_opt.state_dict()}
-    
-    def to(self,dev):
-        self.D_net = self.D_net.to(dev)
-        return self
-    
-    def load_state_dict(self,dic):
-        self.D_net.load_state_dict(dic['net'])
-        self.D_opt.load_state_dict(dic['opt'])
-
-    def get_loss(self, preds, targets):
-        loss_d = 0  
-        x_ori, x_gen, z_noi, z_gen = preds
-        loss_g = self.Lg(x_ori, x_gen)
-        loss_e = self.Le(z_noi, z_gen)
-
+    def forward(self,xs):
+        preds = self.G_net(xs)
+        # train Discriminator
+        global loss_d = 0
         detach = [x.detach() for x in preds]
         for _ in range(self.gan_k):
             self.D_opt.zero_grad()
@@ -59,8 +31,7 @@ class loss(weak_loss):
 
             label_ori = torch.ones_like(d_ori)
             label_gen = torch.zeros_like(d_gen)
-            loss = self.Ld_pos(d_ori, label_ori) + \
-                self.Ld_neg(d_gen, label_gen)
+            loss = self.Ld_pos(d_ori, label_ori) + self.Ld_neg(d_gen, label_gen)
             loss_d += loss
             if self.train_d:
                 loss.backward()
@@ -70,20 +41,58 @@ class loss(weak_loss):
             self.train_d = True
         if loss_d <= 0.5:
             self.train_d = False
-
+        # use Discriminator
         d_ori, d_gen = self.D_net(preds)
-        label_ori = torch.ones_like(d_ori)
-        loss_g_d = self.Lgd(d_gen,label_ori)
         preds.append(d_ori)
         preds.append(d_gen)
+        return preds
+
+    def state_dict(self):
+        return {
+            'G_net':self.G_net.state_dict(),
+            'D_net':self.D_net.state_dict(),
+            'D_opt':self.D_opt.state_dict(),
+        }
+
+    def to(self,dev):
+        self.D_net = self.D_net.to(dev)
+        self.G_net = self.G_net.to(dev)
+        return self
+
+    def load_state_dict(self,dic):
+        self.G_net.load_state_dict(dic['G_net'])
+        self.D_net.load_state_dict(dic['D_net'])
+        self.D_opt.load_state_dict(dic['D_opt'])
+        
+
+class loss(weak_loss):
+    def __init__(self,gan_k,loss_weight):
+        super(loss, self).__init__()
+        self.w = loss_weight
+        # MAE loss between Generated image and original image
+        self.Lg = nn.L1Loss()
+        # MSE loss between Encoder1 and Encoder2
+        self.Le = nn.MSELoss()
+        # Mixed loss
+        self.Lgd = nn.BCEWithLogitsLoss()
+        
+    def get_loss(self, preds, targets):
+        global loss_d
+        x_ori, x_gen, z_noi, z_gen, d_ori, d_gen = preds
+        loss_g = self.Lg(x_ori, x_gen)
+        loss_e = self.Le(z_noi, z_gen)
+        
+        label_ori = torch.ones_like(d_ori)
+        loss_g_d = self.Lgd(d_gen,label_ori)
+        
         total_loss = self.w[0]*loss_g + self.w[1]*loss_e + self.w[2]*loss_g_d
         return total_loss, {'Dis': loss_d, 'MAEx': loss_g, 'MSEz': loss_e, 'Dis(Gen)': loss_g_d}
 
 
 
 class evaluate(weak_evaluate):
-    def __init__(self, result_dir, novelty_threshold, weights):
-        super(evaluate, self).__init__(result_dir)
+    def __init__(self, novelty_threshold, weights):
+        super(evaluate, self).__init__()
         self.threshold = novelty_threshold
         self.weights = weights
 

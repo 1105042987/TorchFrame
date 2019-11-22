@@ -9,26 +9,24 @@ class QRloader(torch.utils.data.Dataset):
         super(QRloader, self).__init__()
         self.train = train
         if train:
-            self.img_dir = cfg['direction']+'img/'
-            self.label_dir = cfg['direction']+'label/'
-            self.name_list = os.listdir(self.img_dir)
-            self.len = len(self.name_list)
+            self.img_dir = os.path.join(cfg['direction'],'img')
+            self.label_dir = os.path.join(cfg['direction'],'label')
         else:
-            self.img_dir = cfg['whole_image_dir']
-            self.name_list = os.listdir(self.img_dir)
-            self.len = len(self.name_list)
+            self.img_dir = cfg['direction']
+        self.name_list = os.listdir(self.img_dir)
+        self.len = len(self.name_list)
         self.image_shape = [tuple(x) for x in cfg['image_shape']]
         self.transform = transform
         self.readin_shape = tuple(cfg['readin_shape'])
         self.flod = torch.nn.Unfold((8, 8), padding=0, stride=8)
 
     def __getitem__(self,idx):
-        img_dir = self.img_dir + self.name_list[idx]
+        img_dir = os.path.join(self.img_dir,self.name_list[idx])
         IMG = cv2.imread(img_dir)
         if self.train:
             inputs = self.transform(IMG).unsqueeze(0).float()
             inputs = self.flod(inputs).permute(0, 2, 1).contiguous().view(-1, 3, 8, 8)
-            lab_dir = self.label_dir + self.name_list[idx][:-3] + 'npz'
+            lab_dir = os.path.join(self.label_dir, self.name_list[idx][:-3]+'npz')
             targets = torch.from_numpy(np.load(lab_dir)['data']).float().reshape(-1)
             targets[targets == 2] = 0.5
         else:

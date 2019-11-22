@@ -10,9 +10,9 @@ from tqdm import tqdm
 from os.path import join as PJOIN
 from tensorboardX import SummaryWriter
 from collections import Iterator
+from docker.meter import meter
 import torch.nn as nn
 import gc
-from utils.meter import meter
 
 class Docker(object):
     def __init__(self,cfg):
