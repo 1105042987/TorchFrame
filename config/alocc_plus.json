@@ -1,6 +1,6 @@
 {
     "system": {
-        "net": "ALOCC_plus",
+        "net": ["ALOCC_plus","net"],
         "time": null,
         "gpu": [0],
         "net_param":{
@@ -32,31 +32,38 @@
             "weights":[1,0.005]
         }
     },
-    "optimizer":{
+    "optmizer":{
         "type": "adam",
         "learning_rate": 1e-4,
         "adam":{"weight_decay":1e-5,"betas":[0,0.5]},
         "sgd":{"weight_decay": 1e-5,"moment":0.9},
+
         "decay_rate": 0.1,
         "milestones": [1000],
+
+        "test_on_train": false,
+        "eval_on_train": false,
         "max_epoch": 1000,
-        "save_epoch": 5,
-        "batch_size": 128,
-        "max_batch": null
-    },
-    "test": {
-        "batch_size": 10
+        "max_batch": null,
+        "save_epoch": 5
     },
     "dataset": {
         "file_name": "mnist",
-        "path": "../../Dataset/MNIST/raw",
+        "path": ["%DATA%","MNIST","raw"],
         "num_workers":2,
-        "train_shuffle":true,
         "pos_num": [1],
         "neg_num": [6,7],
         "image_shape":[28,28],
         "noise_amplitude":0.05,
         "label_noise":0.3,
-        "test_positive_rate":0.5
+        "test_positive_rate":0.5,
+        "train":{
+            "batch_size": 128,
+            "shuffle": true
+        },
+        "test":{
+            "batch_size": 10,
+            "shuffle": false
+        }
     }
 }

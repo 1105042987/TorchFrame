@@ -29,7 +29,7 @@ class Digestpath_fixed_list(torch.utils.data.Dataset):
             rand_list_neg = rand_list_neg[:int(len(rand_list_neg)*self.train_rate)]
             rand_list_pos = rand_list_pos[:int(len(rand_list_pos)*self.train_rate)]
             self.neg = [self.base+'patch/{}/{}'.format(item, i) for item in name['neg'][rand_list_neg] 
-                for i in os.listdir(self.base+'patch/'+item) if i.endswith('.jpg') and not i.endswith('_mask.jpg')]
+                    for i in os.listdir(self.base+'patch/'+item) if i.endswith('.jpg') and not i.endswith('_mask.jpg')]
             if self.pure_pos:
                 if self.positive_picture_only:
                     self.neg = []

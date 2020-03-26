@@ -1,6 +1,6 @@
 {
     "system": {
-        "net": "classifier",
+        "net": ["classifier","net"],
         "time": null,
         "gpu": [0,1,2,3],
         "have_loss_weight":false,
@@ -18,33 +18,40 @@
             "th":0.4
         }
     },
-    "train":{
-        "optimizer": "adam",
+    "optimizer":{
+        "type": "adam",
         "learning_rate": 1e-3,
         "adam":{"weight_decay":0},
         "sgd":{"weight_decay": 1e-5,"momentum":0.9},
+
         "decay_rate": 0.1,
         "milestones": [50,100,150,200],
+
+        "test_on_train": false,
+        "eval_on_train": false,
         "max_epoch": 250,
-        "save_epoch": 10,
-        "batch_size": 40,
-        "max_batch": null
-    },
-    "test": {
-        "batch_size": 8
+        "max_batch": null,
+        "save_epoch": 10
     },
     "dataset": {
         "file_name": "digest_class",
         "num_workers":8,
         "shuffle_name": "shuffle_idx2.pt",
-        "direction": "../../digest/",
+        "direction": ["%DATA%","digest"],
         "Pos_Neg_sample_rate": [1,1],
         "max_batch": 100,
         "train_rate": 0.8,
-        "whole_image": false,
+        "patch_size": 512,
+        "stride_rate": 0.9,
+
         "pure_pos": true,
         "positive_picture_only":true,
-        "patch_size": 512,
-        "stride_rate": 0.9
+        "train":{
+            "batch_size": 40
+        },
+        "test":{
+            "whole_image": false,
+            "batch_size": 8
+        }
     }
 }

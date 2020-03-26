@@ -17,12 +17,12 @@ class net(nn.Module):
 class loss(weak_loss):
     def __init__(self):
         super(loss, self).__init__()
-    def get_loss(self, pre,tar):
+    def get_loss(self, pre, tar):
         return None, {}
 
 class evaluate(weak_evaluate):
-    def __init__(self, result_dir):
-        super(evaluate, self).__init__(result_dir)
+    def __init__(self):
+        super(evaluate, self).__init__()
 
     def get_eval(self, inputs, preds, targets):
         return {}

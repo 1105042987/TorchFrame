@@ -23,7 +23,7 @@
         "decay_rate": 0.1,
         "milestones": [70],
 
-        "test_on_train": true,
+        "test_on_train": false,
         "eval_on_train": false,
         "max_epoch": 100,
         "max_batch": null,
@@ -32,7 +32,7 @@
     "dataset": {
         "file_name": "__demo",
         "num_workers": 2,
-        "direction": "%DATA%/sig_patch",
+        "direction": ["%DATA%","sig_patch"],
         "train":{
             "shuffle":true,
             "batch_size": 16

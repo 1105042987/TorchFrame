@@ -95,7 +95,7 @@ class Docker(object):
             self.__save_param(best_save, self.best)
         if self.epoch != self.epoch_end-1:
             if self.save_epoch == 0: return                  # Just save the best
-            if self.epoch % self.save_epoch != 0: return    # Save every save epoch
+            if self.epoch % self.save_epoch != 0: return     # Save every save epoch
         now_save = PJOIN(self.result_dir,'ckp',str(self.epoch))
         os.makedirs(now_save)
         self.__save_param(now_save, loss_now)
@@ -157,6 +157,7 @@ class Docker(object):
             pbar.close()
             self.writer.close()
             traceback.print_exc()
+            sys.stdout.flush()
             key = input('\nDo you want to reserve this train(Default False)? y/n: ')
             if key != 'y':
                 shutil.rmtree(self.result_dir)
@@ -201,7 +202,7 @@ class Docker(object):
             'sch': self.sch.state_dict(),
             'epoch':self.epoch,
             'cur_loss': _loss,
-        }, _dir+'others.pth')
+        }, PJOIN(_dir,'others.pth'))
 
     def __step(self,data):
         if self.multi_dev:

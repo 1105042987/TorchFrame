@@ -16,8 +16,8 @@ def base_args():
                         help="Remark you want to write")
     parser.add_argument('-no_opt', action='store_true',
                         help='If you do not want to load the weight of optimizer or etc. choose it.')
-    parser.add_argument('-target_code', action='store_true',
-                        help='If you do not want to load the weight of optimizer or etc. choose it.')
+    # parser.add_argument('-target_code', action='store_true',
+    #                     help='If you do not want to load the weight of optimizer or etc. choose it.')
     return parser
 
 class Configuration(object):
@@ -31,8 +31,8 @@ class Configuration(object):
         else:
             load_path, result_dir = self.__ensure_load_path(args)
 
-        if args.target_code:
-            os.chdir(os.path.join(result_dir,'code'))
+        # if args.target_code:
+        #     os.chdir(os.path.join(result_dir,'code'))
         cfg_path = './config/{}.json'.format(args.cfg_file)
         assert os.path.exists(cfg_path), 'Config file not exist!'
         with open(cfg_path) as f:
@@ -55,11 +55,14 @@ class Configuration(object):
 
         self.dataset = dic['dataset']
         for key,val in dic['dataset'].items():
-            if key in ['train','test']: continue
+            if key in ('train','test'): continue
             self.dataset['train'][key] = val
             self.dataset['test'][key] = val
-        self.dataset['train']['direction'] = self.dataset['train']['direction'].replace('%DATA%',self.root['%DATA%'])
-        self.dataset['test']['direction'] = self.dataset['test']['direction'].replace('%DATA%',self.root['%DATA%'])
+
+        for key in ('train', 'test'):
+            if self.dataset[key]['direction'][0] == '%DATA%':
+                self.dataset[key]['direction'][0] = self.root['%DATA%']
+            self.dataset[key]['direction'] = os.path.join(*self.dataset[key]['direction'])
 
     def __copy(self, cfg_path, cfg, result_dir):
         try:
@@ -83,9 +86,10 @@ class Configuration(object):
             shutil.copy(os.path.join('dataset',cfg['dataset']['file_name']+'.py'),tar_data_path) # 数据集文件保存
             shutil.copytree('docker',os.path.join(code_dir,'docker'))      # docker
         except:
-            if os.path.exists(result_dir): 
+            key = input('\nDo you want to reserve this train(Default False)? y/n: ')
+            if key == 'n' and os.path.exists(result_dir): 
                 shutil.rmtree(result_dir)
-            raise('error')
+            raise('Error! This time_stamp has already exists, please wait for 1 min.')
 
 
 
