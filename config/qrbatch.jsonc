@@ -1,13 +1,14 @@
 {
     "system": {
-        "net": ["QRSSD","net"],
+        "net": ["QRNet_patch","net"],
         "time": null,
-        "gpu": [0],
+        "gpu": [],
         "remark": "",
         "net_param":{},
         "loss_param":{},
         "evaluate_param":{
-            
+            "image_shape":[[288,216], [672,504]],
+            "input_width":1920
         }
     },
     "optimizer":{
@@ -17,31 +18,28 @@
         "sgd":{"weight_decay": 1e-5,"moment":0.9},
 
         "decay_rate": 0.6,
-        "milestones": [50,100,150,200],
+        "milestones": [100,200,300,400],
 
         "test_on_train": false,
         "eval_on_train": false,
-        "max_epoch": 200,
+        "max_epoch": 500,
         "max_batch": null,
         "save_epoch": 0
     },
     "dataset": {
-        "file_name": "QRBBox",
-        "num_workers": 8,
-        "input_shape":[504,672],
-        "random_crop":{
-            "size":[504,672],
-            "padding":[128,128,128,128],
-            "numBBoxMax":100
-        },
-        "direction": ["%DATA%","QRdata","mixup"],
+        "file_name": "QR",
+        "num_workers": 2,
+        "batch_size": 1,
         "train":{
-            "batch_size": 8,
+            "direction": ["%DATA%","QRdata"],
             "shuffle": true
         },
         "test":{
-            "batch_size": 1,
+            "direction": ["%DATA%","QRdata","img"],
             "shuffle": false
-        }
+        },
+
+        "image_shape": [[288,216], [672,504]],
+        "readin_shape": [1920, 1440]
     }
 }

@@ -30,28 +30,27 @@
         "test_on_train": false,
         "eval_on_train": false,
         "max_epoch": 250,
-        "max_batch": null,
+        "max_batch": 100,
         "save_epoch": 10
     },
     "dataset": {
         "file_name": "digest_class",
         "num_workers":8,
-        "shuffle_name": "shuffle_idx2.pt",
         "direction": ["%DATA%","digest"],
-        "Pos_Neg_sample_rate": [1,1],
-        "max_batch": 100,
-        "train_rate": 0.8,
-        "patch_size": 512,
-        "stride_rate": 0.9,
-
-        "pure_pos": true,
-        "positive_picture_only":true,
         "train":{
             "batch_size": 40
         },
         "test":{
             "whole_image": false,
             "batch_size": 8
-        }
+        },
+
+        "pure_pos": true,
+        "positive_picture_only":true,
+        "shuffle_name": "shuffle_idx2.pt",
+        "Pos_Neg_sample_rate": [1,1],
+        "train_rate": 0.8,
+        "patch_size": 512,
+        "stride_rate": 0.9
     }
 }

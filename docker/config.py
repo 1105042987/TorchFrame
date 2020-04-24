@@ -1,8 +1,12 @@
-import json
-import argparse
-import shutil
 import os
+import sys
+import json
+import json5
+import shutil
+import argparse
+import traceback
 import numpy as np
+from pprint import pprint
 from datetime import datetime
 
 def base_args():
@@ -17,34 +21,37 @@ def base_args():
     parser.add_argument('-no_opt', action='store_true',
                         help='If you do not want to load the weight of optimizer or etc. choose it.')
     # parser.add_argument('-target_code', action='store_true',
-    #                     help='If you do not want to load the weight of optimizer or etc. choose it.')
+    #                     help='use history code')
     return parser
 
 class Configuration(object):
-    def __init__(self,args, mode):
+    def __init__(self,parser, mode):
         super(Configuration,self).__init__()
         self.mode = mode
+        args, extras = parser.parse_known_args()
+
         with open('RootPath.json') as f:
-            self.root = json.load(f)
+            self.root = json5.load(f)
         if mode == 'train' and args.epoch is None:
             load_path, result_dir = None, None
         else:
             load_path, result_dir = self.__ensure_load_path(args)
-
         # if args.target_code:
-        #     os.chdir(os.path.join(result_dir,'code'))
-        cfg_path = './config/{}.json'.format(args.cfg_file)
+        #     base = sys.path.pop(0)
+        #     sys.path.append(os.path.join(result_dir,'code'))
+
+        cfg_path = './config/{}.jsonc'.format(args.cfg_file)
         assert os.path.exists(cfg_path), 'Config file not exist!'
         with open(cfg_path) as f:
-            dic = json.load(f)
+            dic = json5.load(f)
         if args.remark is not None:
             dic['system']['remark'] = args.remark
-
+        dic = self.__cfgChange(dic,extras)
         if mode == 'train':
             timestamp = datetime.now().strftime('%m%d_%H%M')
             if len(dic['system']['remark'])>0: timestamp += '_'+dic['system']['remark']
             result_dir = os.path.join(self.root[r'%RESULT%'], args.cfg_file, timestamp)
-            self.__copy(cfg_path,dic,result_dir)
+            self.__copy(args.cfg_file,dic,result_dir)
 
         self.system = dic['system']
         self.system['result_dir'] = result_dir
@@ -64,7 +71,36 @@ class Configuration(object):
                 self.dataset[key]['direction'][0] = self.root['%DATA%']
             self.dataset[key]['direction'] = os.path.join(*self.dataset[key]['direction'])
 
-    def __copy(self, cfg_path, cfg, result_dir):
+    def __cfgChange(self,dic,extras):
+        extraParser = argparse.ArgumentParser()
+        for arg in extras:
+            if arg.startswith(("-", "--")):
+                extraParser.add_argument(arg)
+        chgDic = vars(extraParser.parse_args(extras))
+        for arg,val in chgDic.items():
+            for CLS in ('system','optimizer','dataset'):
+                if arg in dic[CLS]:
+                    try: tmp = int(val)
+                    except: 
+                        try: tmp = float(val)
+                        except: 
+                            try: tmp = eval(val)
+                            except:
+                                tmp = val
+                                val = val.lower()
+                                if val == 'null' or val == 'none': tmp = None
+                                elif val == 'true': tmp = True
+                                elif val == 'false': tmp = False
+                    if isinstance(tmp,dict):
+                        for k,v in tmp.items():
+                            dic[CLS][arg][k] = v
+                    else:
+                        dic[CLS][arg] = tmp
+
+        pprint(dic)
+        return dic
+
+    def __copy(self, cfg_name, cfg, result_dir):
         try:
             code_dir = os.path.join(result_dir,'code')
             os.makedirs(os.path.join(result_dir,'ckp'))
@@ -78,7 +114,9 @@ class Configuration(object):
             os.makedirs(tar_model_path)
             os.makedirs(tar_data_path)
 
-            shutil.copy(cfg_path, tar_config_path)  # 参数文件保存
+
+            with open(os.path.join(tar_config_path,cfg_name+'.jsonc'),'w') as f:
+                json.dump(cfg,f)                    # 参数文件保存
             shutil.copy('RootPath.json',code_dir)   # Root 文件保存
             shutil.copy('train.py',code_dir)        # train 文件保存
             shutil.copy('test.py',code_dir)         # test 文件保存
@@ -89,8 +127,8 @@ class Configuration(object):
             key = input('\nDo you want to reserve this train(Default False)? y/n: ')
             if key == 'n' and os.path.exists(result_dir): 
                 shutil.rmtree(result_dir)
-            raise('Error! This time_stamp has already exists, please wait for 1 min.')
-
+            traceback.print_exc()
+            sys.stdout.flush()
 
 
     def __ensure_load_path(self, args):

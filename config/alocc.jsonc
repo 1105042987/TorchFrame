@@ -48,13 +48,6 @@
     "dataset": {
         "file_name": "mnist",
         "path": ["%DATA%","MNIST","raw"],
-        "num_workers":2,
-        "pos_num": [1],
-        "neg_num": [6,7],
-        "image_shape":[28,28],
-        "noise_amplitude":0.05,
-        "label_noise":0.3,
-        "test_positive_rate":0.5,
         "train":{
             "batch_size": 128,
             "shuffle": true
@@ -62,6 +55,14 @@
         "test":{
             "batch_size": 10,
             "shuffle": false
-        }
+        },
+        
+        "num_workers":2,
+        "pos_num": [1],
+        "neg_num": [6,7],
+        "image_shape":[28,28],
+        "noise_amplitude":0.05,
+        "label_noise":0.3,
+        "test_positive_rate":0.5
     }
 }

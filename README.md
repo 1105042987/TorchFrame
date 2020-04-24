@@ -32,3 +32,25 @@ This section records the composition of the model, the calculation of the loss, 
 
 Note that your implementation of the loss and evaluate functions must inherit from the **weak_loss** and **weak_evaluate** virtual classes
 
+#  Execute 
+
+```shell
+python train.py cfg_path ...
+python test.py cfg_path ...
+```
+
+You can use -h to view command line parameters.
+
+And any configuration parameter can be changed on the command line using the form below, although you cannot see it in -h.
+
+```
+-<cfg param name> <param>
+```
+
+## note
+
+- if your -<cfg param name> does not exist in the **jsonc** file, it will not be appanded.
+
+- if your <param> is a **list** / **dict**, use **' '** to mark the **str** type.
+- if your <param> is a **dict**, it will only replace the item you mentioned, instead of overwriting the **original dict** with the **new dict** in the command line.
+

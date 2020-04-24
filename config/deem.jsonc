@@ -39,8 +39,6 @@
         "file_name": "clothes",
         "path": ["%DATA%"],
         "num_workers":2,
-        "trunc_len":20,
-        "neg_rate":0.1,
         "train":{
             "batch_size": 128,
             "shuffle": true
@@ -48,6 +46,9 @@
         "test":{
             "batch_size": 10,
             "shuffle": false
-        }
+        },
+        
+        "trunc_len":20,
+        "neg_rate":0.1
     }
 }

@@ -5,6 +5,8 @@ import torch
 import cv2
 import os
 
+# 为了加速训练, 有一组提前分好patch的数据
+
 class Digestpath_fixed_list(torch.utils.data.Dataset):
     def __init__(self, cfg, mode, transforms):
         super(Digestpath_fixed_list, self).__init__()
@@ -19,6 +21,7 @@ class Digestpath_fixed_list(torch.utils.data.Dataset):
         self.patch_size = cfg['patch_size']
         self.stride = int(self.patch_size*cfg['stride_rate'])
         self.positive_picture_only = cfg['positive_picture_only']
+
         rand_list = torch.load(self.base+cfg['shuffle_name'])
         rand_list_neg = np.array(rand_list['neg'])
         rand_list_pos = np.array(rand_list['pos'])
@@ -26,63 +29,61 @@ class Digestpath_fixed_list(torch.utils.data.Dataset):
         name['neg'] = np.array(name['neg'])
         name['pos'] = np.array(name['pos'])
         if mode == 'train':
+            # 分patch训练
             rand_list_neg = rand_list_neg[:int(len(rand_list_neg)*self.train_rate)]
             rand_list_pos = rand_list_pos[:int(len(rand_list_pos)*self.train_rate)]
             self.neg = [self.base+'patch/{}/{}'.format(item, i) for item in name['neg'][rand_list_neg] 
                     for i in os.listdir(self.base+'patch/'+item) if i.endswith('.jpg') and not i.endswith('_mask.jpg')]
-            if self.pure_pos:
-                if self.positive_picture_only:
-                    self.neg = []
-                self.pos = []
-                for item in name['pos'][rand_list_pos]:
-                    L = os.listdir(self.base+'patch/'+item)
-                    for i in L:
-                        if i.endswith('.jpg') and not i.endswith('_mask.jpg'):
-                            if i.replace('.jpg', '_mask.jpg') in L:
-                                self.pos.append(self.base+'patch/{}/{}'.format(item, i))
-                            else:
-                                self.neg.append(self.base+'patch/{}/{}'.format(item, i))
-            else:
-                self.pos = [self.base+'patch/{}/{}'.format(item, i) for item in name['pos'][rand_list_pos]
-                    for i in os.listdir(self.base+'patch/'+item) if i.endswith('.jpg') and not i.endswith('_mask.jpg')]
+            self.generate_pos()
         else:
             rand_list_neg = rand_list_neg[int(len(rand_list_neg)*self.train_rate):]
             rand_list_pos = rand_list_pos[int(len(rand_list_pos)*self.train_rate):]
             if self.whole:
+                # 全图测试
                 self.neg = list(map(lambda x:self.base+x+'.jpg',name['neg'][rand_list_neg]))
                 self.pos = list(map(lambda x:self.base+x+'.jpg',name['pos'][rand_list_pos]))
             else:
+                # 分patch测试
                 self.neg = [self.base+'patch/{}/{}'.format(item, i) for item in name['neg'][rand_list_neg] 
                         for i in os.listdir(self.base+'patch/'+item)]
-                if self.pure_pos:
-                    if self.positive_picture_only:
-                        self.neg = []
-                    self.pos = []
-                    for item in name['pos'][rand_list_pos]:
-                        L = os.listdir(self.base+'patch/'+item)
-                        for i in L:
-                            if i.endswith('.jpg') and not i.endswith('_mask.jpg'):
-                                if i.replace('.jpg', '_mask.jpg') in L:
-                                    self.pos.append(self.base+'patch/{}/{}'.format(item, i))
-                                else:
-                                    self.neg.append(self.base+'patch/{}/{}'.format(item, i))
-                else:
-                    self.pos = [self.base+'patch/{}/{}'.format(item, i) for item in name['pos'][rand_list_pos] 
-                        for i in os.listdir(self.base+'patch/'+item) if i.endswith('.jpg') and not i.endswith('_mask.jpg')]
+                self.generate_pos()
         self.pos_len = len(self.pos)
         self.neg_len = len(self.neg)
         print(self.pos_len,self.neg_len)
         self.transforms = transforms
+        # 样本均衡
         self.weights = [self.neg_len if i<self.pos_len else self.pos_len for i in range(self.pos_len+self.neg_len)]
 
+    def generate_pos(self):
+        if self.pure_pos:
+            # 正例的patch中, 需要含有病灶才是positive
+            if self.positive_picture_only:
+                self.neg = []
+            self.pos = []
+            for item in name['pos'][rand_list_pos]:
+                L = os.listdir(self.base+'patch/'+item)
+                for i in L:
+                    if i.endswith('.jpg') and not i.endswith('_mask.jpg'):
+                        if i.replace('.jpg', '_mask.jpg') in L:
+                            self.pos.append(self.base+'patch/{}/{}'.format(item, i))
+                        else:
+                            self.neg.append(self.base+'patch/{}/{}'.format(item, i))
+        else:
+            # 正例的patch均为positive
+            self.pos = [self.base+'patch/{}/{}'.format(item, i) for item in name['pos'][rand_list_pos]
+                for i in os.listdir(self.base+'patch/'+item) if i.endswith('.jpg') and not i.endswith('_mask.jpg')]
+
     def __getitem__(self, idx):
+        # 正负例决策
         if idx<self.pos_len:
             name = self.pos[idx]
             targets = torch.ones(1).float()
         else:
             name = self.neg[idx-self.pos_len]
             targets = torch.zeros(1).float()
+
         if self.mode == 'test' and self.whole:
+            # 全图测试时, 由于完整图片过大, 需要在处理时先分patch
             return iter(SplitPatch(name,self.transforms,self.batch,self.patch_size,self.stride,self.pure_pos))
         else:
             inputs = [self.transforms(cv2.imread(name)[:,:,::-1]),name]
