@@ -1,0 +1,75 @@
+{
+    "system": {
+        "net": ["classifier","net"],
+        "remark": "",
+        "time": null,
+        "gpu": [3],
+        "have_loss_weight":false,
+        "net_param":{
+            // "backbone_position":["utils.backbone.Efficientnet","Efficientnet"],
+            // "param":{
+            //     "pretrained":true,
+            //     "name":"efficientnet-b0",
+            //     "num_classes":6,
+            //     "drop_connect_rate":0.4
+            // }
+            "backbone_position":["utils.backbone.resnet","get_ResNet"],
+            "param":{
+                // "drop_connect_rate":0.4,
+                "pretrained":true,
+                "name":"resnet18",
+                "num_classes":6
+            }
+
+        },
+        "loss_param":{
+            
+        },
+        "evaluate_param":{
+            // "whole_img": true
+            "whole_img": false
+        }
+    },
+    "optimizer":{
+        "type": "adam",
+        "learning_rate": 5e-4,
+        "adam":{"weight_decay":0},
+        "sgd":{"weight_decay": 1e-5,"momentum":0.9},
+
+        "decay_rate": 0.6,
+        "milestones": [50,100,150,200],
+
+        "test_on_train": true,
+        "eval_on_train": true,
+        "max_epoch": 250,
+        "max_batch": 400,
+        "save_epoch": 1
+    },
+    "dataset": {
+        "file_name": "panda",
+        "num_workers": 2,
+        "train":{
+            "direction": ["%DATA%","PANDA","train_patch_s"],
+            "LoadName":["img","mask","label.csv"],
+            "PatchSize":null,
+            "ISUP":true,
+            "shuffle":true,
+            "batch_size": 64
+        },
+        "test": {
+            // 整图测试
+            // "direction": ["%DATA%","PANDA"],
+            // "LoadName":["train_png_s","train_mask_s","train.csv"],
+            // "PatchSize":256,
+            // "ISUP":true,
+            // Patch测试
+            "direction": ["%DATA%","PANDA","train_patch_s"],
+            "LoadName":["img","mask","label.csv"],
+            "PatchSize":null,
+            "ISUP":true,
+
+            "shuffle":false,
+            "batch_size": 32
+        }        
+    }
+}

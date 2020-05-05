@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import sys
-sys.path.append('..')
+base = sys.path[0]
+sys.path.append(os.path.abspath(os.path.join(base, "..")))
 import torch
 import torch.nn as nn
 import numpy as np

@@ -1,6 +1,7 @@
 {
     "system": {
         "net": ["classifier","net"],
+        "remark": "",
         "time": null,
         "gpu": [0,1,2,3],
         "have_loss_weight":false,

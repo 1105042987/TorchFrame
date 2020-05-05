@@ -61,16 +61,19 @@ class weak_evaluate(metaclass=ABCMeta):
 
 class weak_SplitPatch(metaclass=ABCMeta):
     def __init__(self,w,h,patch_size,stride,batch):
-        self.WS, self.WE = self.__StartEndSplit(w, patch_size, stride)
-        self.HS, self.HE = self.__StartEndSplit(h, patch_size, stride)
+        self.WS, self.WE = self.StartEndSplit(w, patch_size, stride)
+        self.HS, self.HE = self.StartEndSplit(h, patch_size, stride)
         self.batch = batch
         self.len = len(self.WS)*len(self.HS)
         self.len = self.len//self.batch+((self.len % self.batch) != 0)
         self.num_cnt = 0
 
-    def __StartEndSplit(self,whole_len, patch_size, stride):
+    @staticmethod
+    def StartEndSplit(whole_len, patch_size, stride):
+        if whole_len < patch_size:
+            whole_len = patch_size
         start = list(range(0, whole_len - patch_size + 1, stride))
-        end = list(range(patch_size, whole_len+1, stride))
+        end = list(range(patch_size, whole_len + 1, stride))
         if end[-1] < whole_len:
             end.append(whole_len)
             start.append(whole_len-patch_size)
@@ -81,25 +84,24 @@ class weak_SplitPatch(metaclass=ABCMeta):
         return self
 
     def __next__(self):
-        inps = torch.Tensor([])
-        tars = torch.Tensor([])
+        inps,tars = [],[]
         cnt=0
         if self.num_cnt < self.len:
             self.num_cnt += 1
             for inp,tar in self.GEN:
-                inps = torch.cat((inps,inp))
-                tars = torch.cat((tars,tar))
+                inps.append(inp)
+                tars.append(tar)
                 cnt+=1
                 if cnt==self.batch: break
-            return inps,tars
+            return torch.cat(inps),torch.cat(tars)
         else:
             raise StopIteration
 
     def Generator(self):
         for ws, we in zip(self.WS,self.WE):
             for hs, he in zip(self.HS,self.HE):
-                inp = self.get_input(ws,we,hs,he)
-                tar = self.get_target(ws,we,hs,he)
+                inp = self.get_input(ws,we,hs,he).unsqueeze(0)
+                tar = self.get_target(ws,we,hs,he).unsqueeze(0)
                 yield inp,tar
 
     @abstractmethod

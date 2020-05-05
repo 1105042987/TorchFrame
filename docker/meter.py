@@ -5,7 +5,7 @@ class meter(object):
         self.reset()
 
     def reset(self):
-        self.cnt= {}
+        self.cnt = {}
         self.dic = {}
     
     def add(self,out):

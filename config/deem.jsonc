@@ -1,6 +1,7 @@
 {
     "system": {
         "net": ["DEEMS","net"],
+        "remark": "",
         "time": null,
         "gpu": [0],
         "have_loss_weight":true,

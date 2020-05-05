@@ -29,6 +29,8 @@ class Configuration(object):
         super(Configuration,self).__init__()
         self.mode = mode
         args, extras = parser.parse_known_args()
+        self.visual = args.visual if 'visual' in args else False
+        self.save = args.save if 'save' in args else False
 
         with open('RootPath.json') as f:
             self.root = json5.load(f)
@@ -133,9 +135,10 @@ class Configuration(object):
 
     def __ensure_load_path(self, args):
         direct = os.path.join(self.root[r'%RESULT%'], args.cfg_file)
-        assert os.path.exists(direct), 'Net not exist'
+        assert os.path.exists(direct), 'Net {} not exist'.format(args.cfg_file)
 
         target_timestap_list = os.listdir(direct)
+        target_timestap = args.time
         if target_timestap is None:
             target_timestap_list.sort(key=lambda date: date[:9])
             target_timestap = target_timestap_list[-1]
@@ -144,7 +147,8 @@ class Configuration(object):
                 if args.time == item[:len(args.time)]:
                     target_timestap = item
                     break
-        assert os.path.exists(direct), 'Timestamp not exist'
+        direct = os.path.join(direct,target_timestap,'ckp')
+        assert os.path.exists(direct), 'Timestamp {} not exist'.format(target_timestap)
 
         if args.epoch is None:
             epoches = os.listdir(direct)
@@ -155,6 +159,10 @@ class Configuration(object):
                 epoches = np.array(epoches, dtype=int)
                 args.epoch = str(epoches.max())
         direct = os.path.join(direct, args.epoch)
-        assert os.path.exists(direct), 'Epoch not exist'
+        assert os.path.exists(direct), 'Epoch {} not exist'.format(args.epoch)
 
         return direct, os.path.join(self.root[r'%RESULT%'], args.cfg_file, target_timestap)
+
+
+if __name__ == "__main__":
+    pass

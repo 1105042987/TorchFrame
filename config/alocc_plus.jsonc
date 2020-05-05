@@ -1,6 +1,7 @@
 {
     "system": {
         "net": ["ALOCC_plus","net"],
+        "remark": "",
         "time": null,
         "gpu": [0],
         "net_param":{

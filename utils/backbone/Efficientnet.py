@@ -299,7 +299,8 @@ def get_model_params(model_name, override_params):
 
 
 url_map = {
-    'efficientnet-b0': 'http://storage.googleapis.com/public-models/efficientnet/efficientnet-b0-355c32eb.pth',
+    # 'efficientnet-b0': 'http://storage.googleapis.com/public-models/efficientnet/efficientnet-b0-355c32eb.pth',
+    'efficientnet-b0': 'http://storage.googleapis.com/public-models/efficientnet-b0-08094119.pth',
     'efficientnet-b1': 'http://storage.googleapis.com/public-models/efficientnet/efficientnet-b1-f1951068.pth',
     'efficientnet-b2': 'http://storage.googleapis.com/public-models/efficientnet/efficientnet-b2-8bb594d6.pth',
     'efficientnet-b3': 'http://storage.googleapis.com/public-models/efficientnet/efficientnet-b3-5fb5a3c3.pth',
@@ -530,8 +531,8 @@ class EfficientNet(nn.Module):
 
     @classmethod
     def from_pretrained(cls, model_name, num_classes=1000, *args, **kwargs):
-        model = cls.from_name(model_name, override_params={
-                              'num_classes': num_classes}, *args, **kwargs)
+        kwargs['num_classes'] = num_classes
+        model = cls.from_name(model_name, override_params=kwargs)
         load_pretrained_weights(
             model, model_name, load_fc=(num_classes == 1000))
         return model

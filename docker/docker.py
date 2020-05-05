@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import sys
-sys.path.append('..')
+base = sys.path[0]
+sys.path.append(os.path.abspath(os.path.join(base, "..")))
 import os
 import torch
 import shutil
@@ -27,6 +28,7 @@ class Docker(object):
         self.dev = torch.device('cuda', cfg.system['gpu'][0]) if len(cfg.system['gpu'])>=1 and torch.cuda.is_available() \
             else torch.device('cpu')
         self.multi_dev = len(cfg.system['gpu'])>1
+        self.epoch = 'test'
 
         ## 模型加载
         self.net = getattr(network_module,cfg.system['net'][1])(**cfg.system['net_param']).to(self.dev)
@@ -60,7 +62,7 @@ class Docker(object):
             self.testloader = dataset_module.dataloader(cfg.dataset['test'],
                                 'test') if cfg.optimizer['test_on_train'] else None
         else:
-            self.testloader = dataset_module.dataloader(cfg.dataset,cfg.mode)
+            self.testloader = dataset_module.dataloader(cfg.dataset[cfg.mode],cfg.mode)
 
         # 评估方式
         self.result_dir = cfg.system['result_dir']
@@ -126,11 +128,13 @@ class Docker(object):
                     if idx >= self.max_batch: break
                     self.opt.zero_grad()
                     if isinstance(data, Iterator):
-                        preds, targets = torch.Tensor([]).to(self.dev), torch.Tensor([]).to(self.dev)
-                        for d in tqdm(data, ascii=True, leave=False):
+                        preds, targets = [], []
+                        for d in tqdm(data, ascii=True, leave=False, ncols=130):
                             inputs, sub_pred, sub_tar = self.__step(d)
-                            preds = torch.cat([preds, sub_pred],0)
-                            targets = torch.cat([targets, sub_tar],0)
+                            preds.append(sub_pred)
+                            targets.append(sub_tar)
+                        preds = torch.cat(preds,0)
+                        targets = torch.cat(targets,0)
                     else:
                         inputs, preds, targets = self.__step(data)
                     loss, record_dic = self.criterion(preds, targets)
@@ -171,13 +175,15 @@ class Docker(object):
         with torch.no_grad():
             for idx, data in enumerate(self.testloader):
                 if isinstance(data, Iterator):
-                    preds, targets = torch.Tensor([]).to(self.dev), torch.Tensor([]).to(self.dev)
-                    for d in tqdm(data, ascii=True, leave=False):
-                        inputs, sub_pred, sub_tar = self.__step(d)
-                        preds = torch.cat([preds,sub_pred],0)
-                        targets = torch.cat([targets,sub_tar],0)
-                        gc.collect()
-                        torch.cuda.empty_cache()
+                        preds, targets = [], []
+                        for d in tqdm(data, ascii=True, leave=False, ncols=130):
+                            inputs, sub_pred, sub_tar = self.__step(d)
+                            preds.append(sub_pred)
+                            targets.append(sub_tar)
+                            gc.collect()
+                            torch.cuda.empty_cache()
+                        preds = torch.cat(preds,0)
+                        targets = torch.cat(targets,0)
                 else:
                     inputs,preds,targets = self.__step(data)
                     gc.collect()
@@ -186,10 +192,11 @@ class Docker(object):
                 eval_dic = self.evaluate(inputs, preds, targets, visualize, save_result)
                 loss_meter.add(loss_dic)
                 eval_meter.add(eval_dic)
+                pbar.set_postfix(loss_dic)
                 pbar.update()
         pbar.close()
         self.log_record(loss_meter.mean(),'Test_Loss')
-        self.log_record(loss_meter.mean(),'Test_Eval')
+        self.log_record(eval_meter.mean(),'Test_Eval')
         return eval_meter.mean()
 
     def __save_param(self,_dir,_loss):

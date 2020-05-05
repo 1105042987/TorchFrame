@@ -3,8 +3,8 @@
 You can use the following instructions to create the necessary environment for this framework.
 
 ```shell
-conda install pytorch torchvision tqdm opencv
-pip install tensorboardX
+conda install pytorch torchvision tqdm opencv pandas pillow==6.1
+pip install tensorboardX json5
 ```
 
 # Pytorch Docker
