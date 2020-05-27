@@ -49,8 +49,8 @@ And any configuration parameter can be changed on the command line using the for
 
 ## note
 
-- if your -<cfg param name> does not exist in the **jsonc** file, it will not be appanded.
+- if your `-<cfg param name>` does not exist in the **jsonc** file, it will not be appanded.
 
-- if your <param> is a **list** / **dict**, use **' '** to mark the **str** type.
-- if your <param> is a **dict**, it will only replace the item you mentioned, instead of overwriting the **original dict** with the **new dict** in the command line.
+- if your `<param>` is a **list** / **dict**, use **' '** to mark the **str** type.
+- if your `<param>` is a **dict**, it will only replace the item you mentioned, instead of overwriting the **original dict** with the **new dict** in the command line.
 
