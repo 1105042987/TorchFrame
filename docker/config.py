@@ -82,17 +82,13 @@ class Configuration(object):
         for arg,val in chgDic.items():
             for CLS in ('system','optimizer','dataset'):
                 if arg in dic[CLS]:
-                    try: tmp = int(val)
-                    except: 
-                        try: tmp = float(val)
-                        except: 
-                            try: tmp = eval(val)
-                            except:
-                                tmp = val
-                                val = val.lower()
-                                if val == 'null' or val == 'none': tmp = None
-                                elif val == 'true': tmp = True
-                                elif val == 'false': tmp = False
+                    try: tmp = eval(val)
+                    except:
+                        tmp = val
+                        val = val.lower()
+                        if val == 'null' or val == 'none': tmp = None
+                        elif val == 'true': tmp = True
+                        elif val == 'false': tmp = False
                     if isinstance(tmp,dict):
                         for k,v in tmp.items():
                             dic[CLS][arg][k] = v

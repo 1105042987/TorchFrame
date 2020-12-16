@@ -23,10 +23,17 @@ class Dataset(torch.utils.data.Dataset):
         self.imgBase = os.path.join(self.base,cfg['LoadName'][0])
         self.maskBase = os.path.join(self.base,cfg['LoadName'][1])
         df = pd.read_csv(os.path.join(self.base,cfg['LoadName'][2]))
-        if mode == 'train':
-            df = df[int(len(df)*0.2):]
+        if self.PatchSize is None:
+            PicSize = 10616
+            idxList = df.PicCnt
         else:
-            df = df[:int(len(df)*0.2)]
+            PicSize = len(df)
+            idxList = df.index
+        st,ed = cfg['TestInterval'][0]*PicSize, cfg['TestInterval'][1]*PicSize
+        if mode == 'train':
+            df = df[(idxList<st)|(idxList>=ed)]
+        else:
+            df = df[(idxList>=st)&(idxList<ed)]
         self.len = len(df)
         print(self.len)
         if cfg['LoadName'][2] == 'train.csv':
@@ -157,18 +164,19 @@ def __generate_patch(base = '/remote-home/source/DATA/PANDA/', FROM = 's', patch
     import numpy as np
     # TAR = os.path.join('/root/qsf','train_patch_{}'.format(FROM))
     TAR = os.path.join(base,'train_patch_{}'.format(FROM))
-    MASK = os.path.join(base,'train_maks_{}'.format(FROM))
+    MASK = os.path.join(base,'train_mask_{}'.format(FROM))
     IMG = os.path.join(base,'train_png_{}'.format(FROM))
     fp = os.path.join(base,'train.csv')
     data = pd.read_csv(fp).values
     cnt = 0
+    PicCnt = 0
     if not os.path.exists(TAR):
         os.makedirs(os.path.join(TAR,'img'))
         os.makedirs(os.path.join(TAR,'mask'))
     if not os.path.exists(os.path.join(TAR,'label.csv')):
         jump=0
         with open(os.path.join(TAR,'label.csv'),'w') as f:
-            f.write('id,source,ori_i,ori_g0,ori_g1\n')
+            f.write('id,PicCnt,source,ori_i,ori_g0,ori_g1\n')
     else:
         jump = len(pd.read_csv(os.path.join(TAR,'label.csv')))
 
@@ -180,21 +188,22 @@ def __generate_patch(base = '/remote-home/source/DATA/PANDA/', FROM = 's', patch
             g0,g1 = 0,0
         im = cv2.imread(os.path.join(IMG,n+'.png'))
         if os.path.exists(os.path.join(MASK,n+'.png')):
-            ma = cv2.imread(os.path.join(MASK,n+'.png'))
+            ma = cv2.imread(os.path.join(MASK,n+'.png'))[:,:,0]
         else:
             ma = None
         w,h = im.shape[:2]
         ud = patch_size - w if patch_size > w else 0
         lr = patch_size - h if patch_size > h else 0
-        if ud + lr!=0:
-            im = cv2.copyMakeBorder(im,ud//2,ud-ud//2,lr//2,lr-lr//2,cv2.BORDER_CONSTANT)
-            ma = cv2.copyMakeBorder(ma,ud//2,ud-ud//2,lr//2,lr-lr//2,cv2.BORDER_CONSTANT)
+        if ud + lr != 0:
+            im = cv2.copyMakeBorder(im,ud//2,ud-ud//2,lr//2,lr-lr//2,cv2.BORDER_CONSTANT,value=255)
+            ma = cv2.copyMakeBorder(ma,ud//2,ud-ud//2,lr//2,lr-lr//2,cv2.BORDER_CONSTANT,value=0)
         WS, WE = weak_SplitPatch.StartEndSplit(w, patch_size, stride)
         HS, HE = weak_SplitPatch.StartEndSplit(h, patch_size, stride)
+        im[im>240] = 255
         for ws, we in zip(WS,WE):
             for hs, he in zip(HS,HE):
                 patch = im[ws:we,hs:he,:]
-                if patch.mean() > 230:
+                if patch.mean() > 250:
                     continue
                 if cnt < jump:
                     cnt+=1
@@ -206,8 +215,9 @@ def __generate_patch(base = '/remote-home/source/DATA/PANDA/', FROM = 's', patch
                 cv2.imwrite(os.path.join(TAR,'img','{}.png'.format(cnt)),patch)
                 cv2.imwrite(os.path.join(TAR,'mask','{}.png'.format(cnt)),mask)
                 with open(os.path.join(TAR,'label.csv'),'a') as f:
-                    f.write('{},{},{},{},{}\n'.format(cnt,s,isup,g0,g1))
+                    f.write('{},{},{},{},{},{}\n'.format(cnt,PicCnt,s,isup,g0,g1))
                 cnt+=1
+        PicCnt+=1
 
 
 if __name__ == "__main__":
